@@ -17,6 +17,9 @@ func main() {
 
 	r := gin.Default()
 
+	// Servir archivos estáticos (JS, CSS, HTML, imágenes, etc.)
+	r.Static("/static", "./public")
+
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"mensaje": "¡Hola Mundo!",
