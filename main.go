@@ -2,6 +2,7 @@ package main
 
 import (
 	"classroom/app/configs"
+	"classroom/app/controllers"
 	"log"
 	"net/http"
 
@@ -21,6 +22,8 @@ func main() {
 			"mensaje": "¡Hola Mundo!",
 		})
 	})
+
+	r.GET("/api/v1/departments", controllers.DepartmentFetchAll)
 
 	r.Run(":8080") // Servidor en http://localhost:8080
 }
