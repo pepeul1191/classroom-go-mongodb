@@ -3,6 +3,7 @@ package controllers
 import (
 	"classroom/app/services"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -86,6 +87,40 @@ func DistrictsFetchByProvince(c *gin.Context) {
 				"error":   err.Error(),
 			})
 		}
+		return
+	}
+
+	c.JSON(http.StatusOK, results)
+}
+
+func LocationFind(c *gin.Context) {
+	name := c.Query("name")
+	limit := c.Query("limit")
+
+	if name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": "El parámetro 'name' es requerido",
+		})
+		return
+	}
+
+	var limitN uint
+	if limit == "" {
+		limitN = 10
+	} else {
+		if _, err := fmt.Sscanf(limit, "%d", &limitN); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "limit inválido", "error": err.Error()})
+			return
+		}
+	}
+
+	results, err := services.FindDistrictsByFullName(name, limitN)
+	if err != nil {
+		log.Println("❌ Error al buscar ubicaciones:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Error al buscar ubicaciones",
+			"error":   err.Error(),
+		})
 		return
 	}
 

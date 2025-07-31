@@ -26,6 +26,7 @@ func main() {
 	r.GET("/api/v1/locations/departments", controllers.DepartmentsFetchAll)
 	r.GET("/api/v1/locations/departments/:department_id/provinces", controllers.ProvincesFetchByDepartment)
 	r.GET("/api/v1/locations/provinces/:province_id/districts", controllers.DistrictsFetchByProvince)
+	r.GET("/api/v1/locations/find", controllers.LocationFind)
 
 	r.Run(":8080") // Servidor en http://localhost:8080
 }

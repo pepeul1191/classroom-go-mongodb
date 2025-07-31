@@ -13,3 +13,8 @@ type LocationMin struct {
 	ID   primitive.ObjectID `bson:"_id" json:"_id"`
 	Name string             `bson:"name" json:"name"`
 }
+
+type LocationResult struct {
+	DistrictID string `bson:"district_id" json:"district_id"`
+	FullName   string `bson:"full_name" json:"full_name"`
+}
