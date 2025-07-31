@@ -1,0 +1,195 @@
+@startuml
+
+package "Sistema de Gestión Académica" {
+  abstract class Person {
+    - _id: ObjectId
+    - type: String
+    - names: String
+    - lastNames: String
+    - documentNumber: String
+    - imageUrl: String
+    - addresses: Array<String>
+    - phones: Array<String>
+    - user: User
+    - created: DateTime
+    - updated: DateTime
+    - documentTypeId: ObjectId
+  }
+
+  class Student {
+    - code: String
+    - representatives: RepresentativeRole
+  }
+
+  class RepresentativeRole <<embedded>> {
+    - _id: ObjectId
+    - relation: String
+    - representativeId: ObjectId
+  }
+
+  class Representative {
+  
+  }
+
+  class Teacher {
+    - code: String
+  }
+
+  class DocumentType {
+    - _id: ObjectId
+    - name: String
+  }
+
+  class User <<embedded>> {
+    - id: Integer
+    - email: String
+    - created: DateTime
+    - updated: DateTime
+  }
+
+  class Address <<embedded>> {
+    - _id: ObjectId
+    - name: String
+    - locationId: ObjectId
+    - created: DateTime
+    - updated: DateTime
+  }
+
+  class Location {
+    - _id: ObjectId
+    - name: String
+    - type: String
+    - parentId: ObjectId
+    - created: DateTime
+    - updated: DateTime
+  }
+
+  class Grade{
+    - _id: ObjectId
+    - name: String
+    - created: DateTime
+    - updated: DateTime
+  }
+
+  class Course{
+    - _id: ObjectId
+    - name: String
+    - code: String
+    - description: String
+    - sylabusUrl: String
+    - created: DateTime
+    - updated: DateTime
+    - gradeId: ObjectId
+    - classroomsIds: Array<ObjectId>
+  }
+
+  class Classroom {
+    - _id: ObjectId
+    - name: String
+    - code: String
+    - imageUrl: String
+    - folderId: ObjectId
+    - wallId: ObjectId
+    - studentsIds: Array<ObjectId>
+    - teachersIds: Array<TeacherRole>
+    - evaluationIds: Array<ObjectId>
+  }
+
+  class TeacherRole <<embedded>> {
+    - _id: ObjectId
+    - relation: String
+    - teacherId: ObjectId
+  }
+
+  Person <|-- Student
+  Person <|-- Representative
+  Person <|-- Teacher
+
+  Person "n" *-- "1" DocumentType : tiene
+  User "1" --o "1" Person : asociado a
+  Location "n" --* "n" Address : contiene
+  Person "n" o-- "1..n" Address : tiene
+  Student "n" o-- "1" RepresentativeRole: tiene apodreado
+  Representative "n" --* "1" RepresentativeRole: es apodreado
+
+  Grade "1" --* "n" Course: tiene
+  Classroom "1" --o "n" Course: tiene
+  Student "1" --o "n" Classroom: matriculado
+  Teacher "n" --* "1" TeacherRole: función
+  Classroom "n" o-- "1" TeacherRole: función
+
+  class Folder {
+    - _id: ObjectId
+    - name: String
+    - description: String
+    - created: DateTime
+    - updated: DateTime
+    - parentFolderId: ObjectId 
+    - documents: Array<Document> 
+  }
+
+  class Document <<embedded>> {
+    - _id: ObjectId
+    - name: String
+    - description: String
+    - size: Integer
+    - mime: String
+    - url: String
+    - created: DateTime
+  }
+
+
+  Course "1" *-- "1" Folder : contiene
+  Classroom "1" *-- "1" Folder : contiene
+  Folder "1" o-- "n" Document : contiene
+  Folder "1" --o "n" Folder : contiene subcarpetas
+
+  class Wall {
+    - _id: ObjectId
+    - created: DateTime
+    - updated: DateTime
+    - newItems: Array<NewItem> 
+  }
+
+  class NewItem <<embedded>> {
+    - _id: ObjectId
+    - name: String
+    - description: String
+    - from: Datetime
+    - to: Datetime
+    - created: DateTime
+    - updated: DateTime
+    - visibility: Boolean
+    - documents: Array<Document>
+  }
+
+  Classroom "1" *-- "1" Wall : tiene
+  Wall "1" --o "n" NewItem : contiene
+  NewItem "1" o-- "n" Document : contiene
+
+  class Evaluation {
+    - _id: ObjectId
+    - name: String
+    - description: String
+    - type: String
+    - from: Datetime
+    - to: Datetime
+    - maxGrade: Integer
+    - created: DateTime
+    - updated: DateTime
+    - visibility: Boolean
+    - grades: Array<Calification>
+  }
+
+  class Calification <<embedded>>{
+    - _id: ObjectId
+    - studentId: ObjectId
+    - grade: Integer?
+  }
+
+  Classroom "1" o-- "n" Evaluation : tiene
+  Evaluation "n" o-- "1" Calification : contiene
+  Student "1" --* "1" Calification : contiene
+}
+
+@enduml

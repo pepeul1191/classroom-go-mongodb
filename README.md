@@ -6,3 +6,8 @@ Dependencias:
     $ go get -u github.com/golang-jwt/jwt/v5
     $ go get github.com/joho/godotenv/cmd/godotenv
     $ go get go.mongodb.org/mongo-driver/mongo
+
+.env
+
+    MONGODB_URI=mongodb://localhost:27017
+    MONGODB_DATABASE=peru
