@@ -2,26 +2,15 @@ package main
 
 import (
 	"classroom/app/configs"
-	"classroom/app/controllers"
-	"classroom/app/services"
+	"classroom/app/routes"
 	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
-func setupRoutes(r *gin.Engine) {
-	service := services.NewLocationsService()
-	locationController := &controllers.LocationController{
-		Service: service,
-	}
-
-	r.GET("/api/v1/locations/departments", locationController.DepartmentsFetchAll)
-	//r.POST("/api/v1/locations/departments", locationController.DepartmentsSave)
-	//r.PUT("/api/v1/locations/departments/:department_id", locationController.DepartmentsUpdate)
-	//r.DELETE("/api/v1/locations/departments/:department_id", locationController.DepartmentsDelete)
-	r.GET("/api/v1/locations/departments/:department_id/provinces", locationController.ProvincesFetchByDepartment)
-	r.GET("/api/v1/locations/provinces/:province_id/districts", locationController.DistrictsFetchByProvince)
-	r.GET("/api/v1/locations/find", locationController.LocationFind)
+func mountRoutes(r *gin.Engine) {
+	locationsAPI := r.Group("/api/v1/locations")
+	routes.RegisterLocationRoutes(locationsAPI)
 }
 
 func main() {
@@ -40,7 +29,7 @@ func main() {
 	})
 	r.Static("/static", "./public")
 
-	setupRoutes(r)
+	mountRoutes(r)
 
 	r.Run(":8080") // Servidor en http://localhost:8080
 }
