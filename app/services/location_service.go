@@ -12,7 +12,24 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func FetchDepartments() ([]models.LocationMin, error) {
+// interfáz
+
+type LocationsService interface {
+	FetchDepartments() ([]models.LocationMin, error)
+	FetchProvincesByDepartment(departmentID string) ([]models.LocationMin, error)
+	FetchDistrictsByProvince(provinceID string) ([]models.LocationMin, error)
+	FindDistrictsByFullName(name string, limit uint) ([]models.LocationResult, error)
+}
+
+type locationsServiceImpl struct{}
+
+func NewLocationsService() LocationsService {
+	return &locationsServiceImpl{}
+}
+
+// métodos
+
+func (s *locationsServiceImpl) FetchDepartments() ([]models.LocationMin, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -38,7 +55,7 @@ func FetchDepartments() ([]models.LocationMin, error) {
 	return results, nil
 }
 
-func FetchProvincesByDepartment(departmentID string) ([]models.LocationMin, error) {
+func (s *locationsServiceImpl) FetchProvincesByDepartment(departmentID string) ([]models.LocationMin, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -76,7 +93,7 @@ func FetchProvincesByDepartment(departmentID string) ([]models.LocationMin, erro
 	return results, nil
 }
 
-func FetchDistrictsByProvince(provinceID string) ([]models.LocationMin, error) {
+func (s *locationsServiceImpl) FetchDistrictsByProvince(provinceID string) ([]models.LocationMin, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -114,7 +131,7 @@ func FetchDistrictsByProvince(provinceID string) ([]models.LocationMin, error) {
 	return results, nil
 }
 
-func FindDistrictsByFullName(name string, limit uint) ([]models.LocationResult, error) {
+func (s *locationsServiceImpl) FindDistrictsByFullName(name string, limit uint) ([]models.LocationResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 

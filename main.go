@@ -3,19 +3,25 @@ package main
 import (
 	"classroom/app/configs"
 	"classroom/app/controllers"
+	"classroom/app/services"
 	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
 func setupRoutes(r *gin.Engine) {
-	r.GET("/api/v1/locations/departments", controllers.DepartmentsFetchAll)
-	r.POST("/api/v1/locations/departments", controllers.DepartmentsSave)
-	r.PUT("/api/v1/locations/departments/:department_id", controllers.DepartmentsUpdate)
-	r.DELETE("/api/v1/locations/departments/:department_id", controllers.DepartmentsDelete)
-	r.GET("/api/v1/locations/departments/:department_id/provinces", controllers.ProvincesFetchByDepartment)
-	r.GET("/api/v1/locations/provinces/:province_id/districts", controllers.DistrictsFetchByProvince)
-	r.GET("/api/v1/locations/find", controllers.LocationFind)
+	service := services.NewLocationsService()
+	locationController := &controllers.LocationController{
+		Service: service,
+	}
+
+	r.GET("/api/v1/locations/departments", locationController.DepartmentsFetchAll)
+	//r.POST("/api/v1/locations/departments", locationController.DepartmentsSave)
+	//r.PUT("/api/v1/locations/departments/:department_id", locationController.DepartmentsUpdate)
+	//r.DELETE("/api/v1/locations/departments/:department_id", locationController.DepartmentsDelete)
+	r.GET("/api/v1/locations/departments/:department_id/provinces", locationController.ProvincesFetchByDepartment)
+	r.GET("/api/v1/locations/provinces/:province_id/districts", locationController.DistrictsFetchByProvince)
+	r.GET("/api/v1/locations/find", locationController.LocationFind)
 }
 
 func main() {
