@@ -4,11 +4,25 @@ import (
 	"classroom/app/models"
 )
 
-type MockDepartmentService struct {
+type MockLocationsService struct {
 	Departments []models.LocationMin
 	Err         error
 }
 
-func (m *MockDepartmentService) FetchDepartments() ([]models.LocationMin, error) {
+// respuesta esperada
+func (m *MockLocationsService) FetchDepartments() ([]models.LocationMin, error) {
 	return m.Departments, m.Err
+}
+
+// Los otros métodos pueden dejarse vacíos si no los necesitas para este test
+func (m *MockLocationsService) FetchProvincesByDepartment(string) ([]models.LocationMin, error) {
+	return nil, nil
+}
+
+func (m *MockLocationsService) FetchDistrictsByProvince(string) ([]models.LocationMin, error) {
+	return nil, nil
+}
+
+func (m *MockLocationsService) FindDistrictsByFullName(string, uint) ([]models.LocationResult, error) {
+	return nil, nil
 }

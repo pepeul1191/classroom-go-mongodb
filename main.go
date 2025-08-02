@@ -9,8 +9,7 @@ import (
 )
 
 func mountRoutes(r *gin.Engine) {
-	locationsAPI := r.Group("/api/v1/locations")
-	routes.RegisterLocationRoutes(locationsAPI)
+	routes.RegisterLocationRoutes(r.Group("/api/v1/locations"))
 }
 
 func main() {
