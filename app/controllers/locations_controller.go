@@ -1,12 +1,14 @@
 package controllers
 
 import (
+	"classroom/app/models"
 	"classroom/app/services"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type LocationController struct {
@@ -116,4 +118,57 @@ func (lc *LocationController) LocationFind(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, districts)
 	}
+}
+
+func (lc *LocationController) DepartmentsCreate(c *gin.Context) {
+	var input models.LocationMin
+
+	// Intentar vincular el JSON al modelo
+	if err := c.ShouldBindJSON(&input); err != nil || input.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "JSON inválido o faltan campos requeridos",
+		})
+		return
+	}
+
+	// Llamar al servicio para insertar
+	location, err := lc.Service.InsertDepartment(input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "No se pudo insertar el departamento",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, location)
+}
+
+func (lc *LocationController) ProvincesCreate(c *gin.Context) {
+	var input models.LocationMin
+	departmentIdStr := c.Param("department_id")
+
+	parentID, err := primitive.ObjectIDFromHex(departmentIdStr)
+	if err != nil {
+		fmt.Println("❌ ID inválido:", err)
+		return
+	}
+
+	// Intentar vincular el JSON al modelo
+	if err := c.ShouldBindJSON(&input); err != nil || input.Name == "" {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "JSON inválido o faltan campos requeridos",
+		})
+		return
+	}
+
+	// Llamar al servicio para insertar
+	location, err := lc.Service.InsertProvince(input, parentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "No se pudo insertar el departamento",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, location)
 }

@@ -19,6 +19,8 @@ type LocationsService interface {
 	FetchProvincesByDepartment(departmentID string) ([]models.LocationMin, error)
 	FetchDistrictsByProvince(provinceID string) ([]models.LocationMin, error)
 	FindDistrictsByFullName(name string, limit uint) ([]models.LocationResult, error)
+	InsertDepartment(dep models.LocationMin) (*models.Location, error)
+	InsertProvince(pro models.LocationMin, deparmentId primitive.ObjectID) (*models.Location, error)
 }
 
 type locationsServiceImpl struct{}
@@ -231,4 +233,53 @@ func (s *locationsServiceImpl) FindDistrictsByFullName(name string, limit uint) 
 	}
 
 	return results, nil
+}
+
+func (s *locationsServiceImpl) InsertDepartment(dep models.LocationMin) (*models.Location, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	collection := configs.DB.Collection("locations")
+
+	now := time.Now()
+
+	newDepartment := models.Location{
+		ID:      primitive.NewObjectID(),
+		Name:    dep.Name,
+		Type:    "department",
+		Created: now,
+		Updated: now,
+	}
+
+	_, err := collection.InsertOne(ctx, newDepartment)
+	if err != nil {
+		return nil, err
+	}
+
+	return &newDepartment, nil
+}
+
+func (s *locationsServiceImpl) InsertProvince(loc models.LocationMin, deparmentId primitive.ObjectID) (*models.Location, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	collection := configs.DB.Collection("locations")
+
+	now := time.Now()
+
+	newProvince := models.Location{
+		ID:       loc.ID,
+		Name:     loc.Name,
+		Type:     "province",
+		Created:  now,
+		Updated:  now,
+		ParentID: &deparmentId,
+	}
+
+	_, err := collection.InsertOne(ctx, newProvince)
+	if err != nil {
+		return nil, err
+	}
+
+	return &newProvince, nil
 }

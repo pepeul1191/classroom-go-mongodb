@@ -1,6 +1,7 @@
 package test
 
 import (
+	"bytes"
 	"classroom/app/controllers"
 	"classroom/app/models"
 	"classroom/tests/mocks"
@@ -76,4 +77,57 @@ func TestDepartmentsFetchAll_Error(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}
+
+func TestDepartmentsCreate_Success(t *testing.T) {
+	mock := &mocks.MockLocationsService{}
+
+	router := gin.Default()
+	controller := &controllers.LocationController{Service: mock}
+	router.POST("/api/v1/locations/departments", controller.DepartmentsCreate)
+
+	body := `{"name":"Lima"}`
+	req, _ := http.NewRequest("POST", "/api/v1/locations/departments", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+
+	var loc models.Location
+	json.Unmarshal(w.Body.Bytes(), &loc)
+	println("1 ++++++++++++++++++++++++++++++++++++++++")
+	println(loc.ID.Hex())
+	println("2 ++++++++++++++++++++++++++++++++++++++++")
+	assert.Equal(t, "Lima", loc.Name)
+	assert.Equal(t, "department", loc.Type)
+	// Validar que el ID no esté vacío (puede ser cualquier ObjectID válido)
+	assert.False(t, loc.ID.IsZero(), "ID debe estar presente")
+
+	// Validar que las fechas estén inicializadas
+	assert.False(t, loc.Created.IsZero(), "Created no debe estar vacío")
+	assert.False(t, loc.Updated.IsZero(), "Updated no debe estar vacío")
+
+	// También puedes imprimir si quieres ver los valores:
+	t.Logf("ID: %s\nCreated: %s\nUpdated: %s", loc.ID.Hex(), loc.Created.String(), loc.Updated.String())
+}
+
+func TestDepartmentsCreate_MissingName(t *testing.T) {
+	mock := &mocks.MockLocationsService{}
+
+	router := gin.Default()
+	controller := &controllers.LocationController{Service: mock}
+	router.POST("/api/v1/locations/departments", controller.DepartmentsCreate)
+
+	// Body con campo "name" vacío
+	body := `{"name":""}`
+	req, _ := http.NewRequest("POST", "/api/v1/locations/departments", bytes.NewBufferString(body))
+	req.Header.Set("Content-Type", "application/json")
+
+	w := httptest.NewRecorder()
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+	assert.Contains(t, w.Body.String(), "JSON inválido")
 }

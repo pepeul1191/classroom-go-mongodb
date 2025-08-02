@@ -17,7 +17,7 @@ type Location struct {
 
 type LocationMin struct {
 	ID   primitive.ObjectID `bson:"_id" json:"_id"`
-	Name string             `bson:"name" json:"name"`
+	Name string             `bson:"name" json:"name" binding:"required`
 }
 
 type LocationResult struct {
