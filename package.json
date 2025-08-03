@@ -1,0 +1,33 @@
+{
+  "name": "classroom",
+  "version": "1.0.0",
+  "description": "API Classroom con Go y MongoDB",
+  "main": "index.js",
+  "type": "module",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "nodemon --exec go run main.go --watch './**/*.go' --ext go --delay 1",
+    "start": "go run main.go",
+    "test": "go test ./... -v"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pepeul1191/classroom-go-mongodb.git"
+  },
+  "author": "Pepe Valdivia",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pepeul1191/classroom-go-mongodb/issues"
+  },
+  "homepage": "https://github.com/pepeul1191/classroom-go-mongodb#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "go": ">=1.20"
+  }
+}
