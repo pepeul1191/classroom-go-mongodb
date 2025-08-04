@@ -4,6 +4,8 @@ import (
 	"classroom/app/configs"
 	"classroom/app/models"
 	"context"
+	"fmt"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -21,6 +23,7 @@ type LocationsService interface {
 	FindDistrictsByFullName(name string, limit uint) ([]models.LocationResult, error)
 	InsertDepartment(dep models.LocationMin) (*models.Location, error)
 	InsertProvince(pro models.LocationMin, deparmentId primitive.ObjectID) (*models.Location, error)
+	ProcessDepartments(news []models.NewLocation, edits []models.EditLocation, deletes []primitive.ObjectID) ([]models.CreatedLocationResponse, error)
 }
 
 type locationsServiceImpl struct{}
@@ -282,4 +285,68 @@ func (s *locationsServiceImpl) InsertProvince(loc models.LocationMin, deparmentI
 	}
 
 	return &newProvince, nil
+}
+
+func (s *locationsServiceImpl) ProcessDepartments(news []models.NewLocation, edits []models.EditLocation, deletes []primitive.ObjectID) ([]models.CreatedLocationResponse, error) {
+	response := make([]models.CreatedLocationResponse, 0)
+	ctx := context.Background()
+	collection := configs.DB.Collection("locations")
+
+	// 1. Crear nuevas ubicaciones (sin transacción)
+	for _, incoming := range news {
+		newLocation := models.Location{
+			Name:    incoming.Name,
+			Type:    "department",
+			Created: time.Now(),
+			Updated: time.Now(),
+		}
+
+		result, err := collection.InsertOne(ctx, newLocation)
+		if err != nil {
+			return nil, fmt.Errorf("error creando ubicación: %v", err)
+		}
+
+		response = append(response, models.CreatedLocationResponse{
+			Tmp: incoming.ID,
+			ID:  result.InsertedID.(primitive.ObjectID).Hex(),
+		})
+		debug := func(msg string, data interface{}) {
+			fmt.Printf("[DEBUG] %s: %+v\n", msg, data)
+			log.Printf("[LOG] %s: %+v", msg, data)
+		}
+		debug("Después del append", response)
+	}
+
+	// 2. Actualizar (sin transacción)
+	for _, incoming := range edits {
+		objID, err := primitive.ObjectIDFromHex(incoming.ID)
+		if err != nil {
+			return nil, fmt.Errorf("ID inválido: %s", incoming.ID)
+		}
+
+		_, err = collection.UpdateOne(
+			ctx,
+			bson.M{"_id": objID},
+			bson.M{"$set": bson.M{
+				"name":    incoming.Name,
+				"updated": time.Now(),
+			}},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error actualizando ubicación %s: %v", incoming.ID, err)
+		}
+	}
+
+	// 3. Eliminar (sin transacción)
+	if len(deletes) > 0 {
+		_, err := collection.DeleteMany(
+			ctx,
+			bson.M{"_id": bson.M{"$in": deletes}},
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error eliminando ubicaciones: %v", err)
+		}
+	}
+
+	return response, nil
 }

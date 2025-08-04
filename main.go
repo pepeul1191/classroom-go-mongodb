@@ -30,7 +30,6 @@ func main() {
 		c.Next()
 	})
 	r.Static("/static", "./public")
-
 	// cors
 
 	r.Use(cors.New(cors.Config{

@@ -16,6 +16,8 @@ type LocationController struct {
 }
 
 func (lc *LocationController) DepartmentsFetchAll(c *gin.Context) {
+	gin.DefaultWriter.Write([]byte("Mensaje de depuración\n"))
+
 	departments, err := lc.Service.FetchDepartments()
 	if err != nil {
 		log.Println("❌ Error al obtener departamentos:", err)
@@ -171,4 +173,33 @@ func (lc *LocationController) ProvincesCreate(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, location)
+}
+
+func (lc *LocationController) SaveDepartments(c *gin.Context) {
+	// Parsear request
+	var req models.LocationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Datos inválidos", "error": err.Error()})
+		return
+	}
+
+	// Convertir IDs de strings a ObjectID
+	var deletes []primitive.ObjectID
+	for _, id := range req.Deletes {
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "ID inválido", "id": id})
+			return
+		}
+		deletes = append(deletes, objID)
+	}
+
+	// Procesar con el servicio
+	response, err := lc.Service.ProcessDepartments(req.News, req.Edits, deletes)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error al procesar ubicaciones", "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
 }
