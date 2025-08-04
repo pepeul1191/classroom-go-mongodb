@@ -23,7 +23,7 @@ type LocationsService interface {
 	FindDistrictsByFullName(name string, limit uint) ([]models.LocationResult, error)
 	InsertDepartment(dep models.LocationMin) (*models.Location, error)
 	InsertProvince(pro models.LocationMin, deparmentId primitive.ObjectID) (*models.Location, error)
-	ProcessDepartments(news []models.NewLocation, edits []models.EditLocation, deletes []primitive.ObjectID) ([]models.CreatedLocationResponse, error)
+	ProcessLocations(news []models.NewLocation, edits []models.EditLocation, deletes []primitive.ObjectID, loctionType string, parentId *primitive.ObjectID) ([]models.CreatedLocationResponse, error)
 }
 
 type locationsServiceImpl struct{}
@@ -287,7 +287,7 @@ func (s *locationsServiceImpl) InsertProvince(loc models.LocationMin, deparmentI
 	return &newProvince, nil
 }
 
-func (s *locationsServiceImpl) ProcessDepartments(news []models.NewLocation, edits []models.EditLocation, deletes []primitive.ObjectID) ([]models.CreatedLocationResponse, error) {
+func (s *locationsServiceImpl) ProcessLocations(news []models.NewLocation, edits []models.EditLocation, deletes []primitive.ObjectID, loctionType string, parentId *primitive.ObjectID) ([]models.CreatedLocationResponse, error) {
 	response := make([]models.CreatedLocationResponse, 0)
 	ctx := context.Background()
 	collection := configs.DB.Collection("locations")
@@ -295,10 +295,11 @@ func (s *locationsServiceImpl) ProcessDepartments(news []models.NewLocation, edi
 	// 1. Crear nuevas ubicaciones (sin transacción)
 	for _, incoming := range news {
 		newLocation := models.Location{
-			Name:    incoming.Name,
-			Type:    "department",
-			Created: time.Now(),
-			Updated: time.Now(),
+			Name:     incoming.Name,
+			Type:     loctionType,
+			Created:  time.Now(),
+			Updated:  time.Now(),
+			ParentID: parentId,
 		}
 
 		result, err := collection.InsertOne(ctx, newLocation)

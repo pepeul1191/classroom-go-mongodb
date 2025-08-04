@@ -183,6 +183,8 @@ func (lc *LocationController) SaveDepartments(c *gin.Context) {
 		return
 	}
 
+	var parentID *primitive.ObjectID = nil
+
 	// Convertir IDs de strings a ObjectID
 	var deletes []primitive.ObjectID
 	for _, id := range req.Deletes {
@@ -195,7 +197,81 @@ func (lc *LocationController) SaveDepartments(c *gin.Context) {
 	}
 
 	// Procesar con el servicio
-	response, err := lc.Service.ProcessDepartments(req.News, req.Edits, deletes)
+	response, err := lc.Service.ProcessLocations(req.News, req.Edits, deletes, "department", parentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error al procesar ubicaciones", "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (lc *LocationController) SaveProvinces(c *gin.Context) {
+	deparmentIdStr := c.Param("department_id")
+	deparmentId, err := primitive.ObjectIDFromHex(deparmentIdStr)
+	var parentID *primitive.ObjectID = &deparmentId
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "DepartmentID inválido", "deparmentId": deparmentId})
+		return
+	}
+
+	// Parsear request
+	var req models.LocationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Datos inválidos", "error": err.Error()})
+		return
+	}
+
+	// Convertir IDs de strings a ObjectID
+	var deletes []primitive.ObjectID
+	for _, id := range req.Deletes {
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "ID inválido", "id": id})
+			return
+		}
+		deletes = append(deletes, objID)
+	}
+
+	// Procesar con el servicio
+	response, err := lc.Service.ProcessLocations(req.News, req.Edits, deletes, "province", parentID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error al procesar ubicaciones", "error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func (lc *LocationController) SaveDistricts(c *gin.Context) {
+	provinceIdStr := c.Param("province_id")
+	provinceId, err := primitive.ObjectIDFromHex(provinceIdStr)
+	var parentID *primitive.ObjectID = &provinceId
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "DepartmentID inválido", "provinceId": provinceId})
+		return
+	}
+
+	// Parsear request
+	var req models.LocationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Datos inválidos", "error": err.Error()})
+		return
+	}
+
+	// Convertir IDs de strings a ObjectID
+	var deletes []primitive.ObjectID
+	for _, id := range req.Deletes {
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "ID inválido", "id": id})
+			return
+		}
+		deletes = append(deletes, objID)
+	}
+
+	// Procesar con el servicio
+	response, err := lc.Service.ProcessLocations(req.News, req.Edits, deletes, "district", parentID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error al procesar ubicaciones", "error": err.Error()})
 		return

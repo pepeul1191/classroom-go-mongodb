@@ -16,7 +16,8 @@ func RegisterLocationRoutes(r *gin.RouterGroup) {
 	r.GET("/departments", controller.DepartmentsFetchAll)
 	r.POST("/departments", controller.SaveDepartments)
 	r.GET("/departments/:department_id/provinces", controller.ProvincesFetchByDepartment)
-	r.POST("/departments/:department_id/provinces", controller.ProvincesCreate)
+	r.POST("/departments/:department_id/provinces", controller.SaveProvinces)
 	r.GET("/provinces/:province_id/districts", controller.DistrictsFetchByProvince)
+	r.POST("/provinces/:province_id/districts", controller.SaveDistricts)
 	r.GET("/find", controller.LocationFind)
 }
