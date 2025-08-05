@@ -8,8 +8,8 @@ package "Sistema de Gestión Académica" {
     - lastNames: String
     - documentNumber: String
     - imageUrl: String
-    - addresses: Array<String>
-    - phones: Array<String>
+    - addresses: Array<Address>
+    - phones: Array<Phone>
     - user: User
     - created: DateTime
     - updated: DateTime
@@ -43,6 +43,14 @@ package "Sistema de Gestión Académica" {
   class User <<embedded>> {
     - id: Integer
     - email: String
+    - created: DateTime
+    - updated: DateTime
+  }
+
+  class Phone <<embedded>> {
+    - _id: ObjectId
+    - name: String
+    - number: String
     - created: DateTime
     - updated: DateTime
   }

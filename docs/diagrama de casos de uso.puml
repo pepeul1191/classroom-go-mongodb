@@ -1,0 +1,30 @@
+@startuml
+
+left to right direction  
+
+actor Administrador as "Admin"       
+
+rectangle SistemaHotel {         
+  (Gestión de Locaciones) as UC1   
+  (Gestión de Docentes) as UC2     
+  (Gestión de Alumnos) as UC3
+  (Gestión de Apoderados) as UC4
+  (Asosciar Apoderados a Alumnos) as UC5
+  (Gestión de Cursos) as UC6
+  (Gestión de Secciones) as UC7
+  (Asosciar Alumnos a Sección) as UC8
+  (Asosciar Docentes a Sección) as UC9
+
+  Admin --> UC1
+  Admin --> UC2
+  Admin --> UC3
+  Admin --> UC4
+  UC3 <|-- UC5 : <<extend>>
+  
+  Admin --> UC6
+  Admin --> UC7
+  UC7 <|-- UC8 : <<extend>>
+  UC7 <|-- UC9 : <<extend>>
+}
+
+@enduml

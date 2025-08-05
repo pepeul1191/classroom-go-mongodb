@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthController struct {
@@ -19,7 +20,6 @@ func NewAuthController(secret string) *AuthController {
 }
 
 func (ac *AuthController) GenerateToken(c *gin.Context) {
-	println("1 ++++++++++++++++++++++++++++++++++++++++++++++++++")
 	var req models.TokenRequest
 
 	// Validar la estructura básica con Gin
@@ -41,8 +41,17 @@ func (ac *AuthController) GenerateToken(c *gin.Context) {
 	}
 
 	// Simulación: obtener persona (normalmente desde BD)
+	// Convertir el string ID a ObjectID
+	objID, err := primitive.ObjectIDFromHex("688bc5a09cb60ad40cbe61dc")
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error":  "Al capturar el usuario",
+			"detail": err.Error(),
+		})
+		return
+	}
 	person := models.Person{
-		ID:        "64f123abcde",
+		ID:        objID,
 		Names:     "Pepe",
 		LastNames: "Valdivia",
 		ImageURL:  "user-default.png",

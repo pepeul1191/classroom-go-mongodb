@@ -11,8 +11,10 @@ import (
 )
 
 func mountRoutes(r *gin.Engine) {
+	routes.RegisterDocumentTypesRoutes(r.Group("/api/v1/document-types"))
 	routes.RegisterLocationRoutes(r.Group("/api/v1/locations"))
 	routes.RegisterAuthRoutes(r.Group("/api/v1/auth"))
+	routes.RegisterTeacherRoutes(r.Group("/api/v1/teachers"))
 }
 
 func main() {
